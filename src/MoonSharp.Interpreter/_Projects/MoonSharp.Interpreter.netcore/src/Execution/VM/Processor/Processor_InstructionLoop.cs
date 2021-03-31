@@ -896,10 +896,21 @@ namespace MoonSharp.Interpreter.Execution.VM
 			}
 			else
 			{
-				int ip = Internal_InvokeBinaryMetaMethod(l, r, "__add", instructionPtr);
-				if (ip >= 0) return ip;
-				else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
-			}
+				if (l != null && r != null)
+                {
+					string rs = r.CastToString();
+					string ls = l.CastToString();
+
+					m_ValueStack.Push(DynValue.NewString(ls + rs));
+					return instructionPtr;
+                }
+				else
+                {
+					int ip = Internal_InvokeBinaryMetaMethod(l, r, "__add", instructionPtr);
+					if (ip >= 0) return ip;
+					else throw ScriptRuntimeException.ConcatOnNonString(l, r);
+                }
+            }
 		}
 
 		private int ExecSub(Instruction i, int instructionPtr)

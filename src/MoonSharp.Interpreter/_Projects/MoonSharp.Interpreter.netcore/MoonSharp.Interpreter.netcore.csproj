@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>http://www.moonsharp.org</Description>
+    <Description>http://www.moonsharp.org
+fork by Matěj "lof" Štágl</Description>
     <Copyright>(C) 2014-2016 Marco Mastropaolo</Copyright>
     <AssemblyTitle>MoonSharp.Interpreter</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <DefineConstants>$(DefineConstants);DOTNET_CORE;NETFX_CORE</DefineConstants>
     <AssemblyName>MoonSharp.Interpreter</AssemblyName>
     <PackageId>MoonSharp.Interpreter.netcore</PackageId>
@@ -14,6 +15,9 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.0.1</AssemblyVersion>
   </PropertyGroup>
 
 </Project>
