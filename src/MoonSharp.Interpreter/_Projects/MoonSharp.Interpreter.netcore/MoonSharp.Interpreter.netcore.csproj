@@ -16,8 +16,8 @@ fork by Matěj "lof" Štágl</Description>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.1</Version>
-    <AssemblyVersion>2.0.0.1</AssemblyVersion>
+    <Version>2.0.2</Version>
+    <AssemblyVersion>2.0.0.2</AssemblyVersion>
   </PropertyGroup>
 
 </Project>

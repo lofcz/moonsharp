@@ -66,10 +66,13 @@ namespace MoonSharp.Interpreter.Tree
 
 		private static Statement DispatchForLoopStatement(ScriptLoadingContext lcontext)
 		{
+			//  for (Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end) | 
 			//	for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end | 
 			//	for namelist in explist do block end | 		
 
 			Token forTkn = CheckTokenType(lcontext, TokenType.For);
+
+			CheckTokenTypeAndDiscard(lcontext, TokenType.Brk_Open_Round);
 
 			Token name = CheckTokenType(lcontext, TokenType.Name);
 
