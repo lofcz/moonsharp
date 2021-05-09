@@ -1,6 +1,7 @@
 ﻿using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
+﻿using System.Collections.Generic;
 
 using MoonSharp.Interpreter.Tree.Expressions;
 
@@ -14,6 +15,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 		SymbolRef m_VarName;
 		Expression m_Start, m_End, m_Step;
 		SourceRef m_RefFor, m_RefEnd;
+		TokenType stepOp = TokenType.Op_Add;
 
 		public ForLoopStatement(ScriptLoadingContext lcontext, Token nameToken, Token forToken)
 			: base(lcontext)
@@ -24,12 +26,32 @@ namespace MoonSharp.Interpreter.Tree.Statements
 			CheckTokenType(lcontext, TokenType.Op_Assignment);
 
 			m_Start = Expression.Expr(lcontext);
-			CheckTokenType(lcontext, TokenType.Comma);
+			CheckTokenType(lcontext, TokenType.Comma, TokenType.SemiColon);
+
+			if (CheckTokenTypeAndDiscardIfMatch(lcontext, TokenType.Name, nameToken.Text))
+            {
+				CheckTokenTypeAndDiscardIfNot(lcontext, TokenTypeUtils.operators);
+            }
+
+
 			m_End = Expression.Expr(lcontext);
 
-			if (lcontext.Lexer.Current.Type == TokenType.Comma)
+			if (lcontext.Lexer.Current.Type == TokenType.Comma || lcontext.Lexer.Current.Type == TokenType.SemiColon)
 			{
 				lcontext.Lexer.Next();
+
+				if (CheckTokenTypeAndDiscardIfMatch(lcontext, TokenType.Name, nameToken.Text))
+				{
+					Token stepToken = CheckTokenTypeAndDiscard(lcontext, TokenTypeUtils.operators);
+					Token stepToken2 = CheckTokenTypeAndDiscardIfNot(lcontext, TokenTypeUtils.operators);
+
+					if (stepToken != null && TokenTypeUtils.IsOpToken(stepToken.Type))
+					{
+						stepOp = stepToken.Type;
+
+					}
+				}
+
 				m_Step = Expression.Expr(lcontext);
 			}
 			else
@@ -39,6 +61,9 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			lcontext.Scope.PushBlock();
 			m_VarName = lcontext.Scope.DefineLocal(nameToken.Text);
+			
+			forToken.GetSourceRef(CheckTokenTypeAndDiscard(lcontext, TokenType.Brk_Close_Round));
+			
 			m_RefFor = forToken.GetSourceRef(CheckTokenType(lcontext, TokenType.Do));
 			m_InnerBlock = new CompositeStatement(lcontext);
 			m_RefEnd = CheckTokenType(lcontext, TokenType.End).GetSourceRef();

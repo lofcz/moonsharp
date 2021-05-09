@@ -1,4 +1,6 @@
-﻿using MoonSharp.Interpreter.Execution;
+﻿using System.Collections.Generic;
+using System.Linq;
+using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
 
 namespace MoonSharp.Interpreter.Tree
@@ -36,6 +38,54 @@ namespace MoonSharp.Interpreter.Tree
 			return t;
 		}
 
+		protected static bool CheckTokenTypeAndDiscardIfMatch(ScriptLoadingContext lcontext, TokenType tokenType, string text)
+		{
+			Token t = lcontext.Lexer.Current;
+			if (t.Type == tokenType && t.Text == text)
+            {
+				lcontext.Lexer.Next();
+				return true;
+            }
+
+			return false;
+		}
+
+		protected static Token CheckTokenTypeAndDiscard(ScriptLoadingContext lcontext, TokenType tokenType)
+		{
+			Token t = lcontext.Lexer.Current;
+			if (t.Type == tokenType)
+				lcontext.Lexer.Next();
+
+			return t;
+		}
+
+		protected static Token CheckTokenTypeAndDiscard(ScriptLoadingContext lcontext, IEnumerable<TokenType> tokenTypes)
+		{
+			Token t = lcontext.Lexer.Current;
+			if (tokenTypes == null)
+            {
+				return t;
+            }
+
+			if (tokenTypes.Contains(t.Type))
+				lcontext.Lexer.Next();
+
+			return t;
+		}
+
+		protected static Token CheckTokenTypeAndDiscardIfNot(ScriptLoadingContext lcontext, IEnumerable<TokenType> tokenTypes)
+		{
+			Token t = lcontext.Lexer.Current;
+			if (tokenTypes == null)
+            {
+				return t;
+            }
+
+			if (tokenTypes.Contains(t.Type))
+				lcontext.Lexer.Next();
+
+			return t;
+		}
 
 
 		protected static Token CheckTokenType(ScriptLoadingContext lcontext, TokenType tokenType1, TokenType tokenType2)

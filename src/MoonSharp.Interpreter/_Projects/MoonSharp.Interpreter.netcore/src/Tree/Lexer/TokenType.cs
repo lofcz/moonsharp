@@ -1,7 +1,33 @@
 ﻿
+using System.Collections.Generic;
+
 namespace MoonSharp.Interpreter.Tree
 {
-	enum TokenType
+	public static class TokenTypeUtils
+    {
+		public static readonly List<TokenType> operators = new List<TokenType>() {
+			TokenType.Op_Equal, 
+			TokenType.Op_Assignment, 
+			TokenType.Op_LessThan,
+			TokenType.Op_LessThanEqual,
+			TokenType.Op_GreaterThan,
+			TokenType.Op_GreaterThanEqual,
+			TokenType.Op_Add,
+			TokenType.Op_MinusOrSub,
+			TokenType.Op_Mul,
+			TokenType.Op_Div,
+			TokenType.Op_Mod,
+			TokenType.Op_Pwr,
+			TokenType.Op_Len,
+		};
+
+		public static bool IsOpToken(TokenType type)
+        {
+			return type == TokenType.Op_Add || type == TokenType.Op_MinusOrSub || type == TokenType.Op_Mul || type == TokenType.Op_Div || type == TokenType.Op_Mod || type == TokenType.Op_Pwr || type == TokenType.Op_Len;
+        }
+    }
+
+	public enum TokenType
 	{
 		Eof,
 		HashBang,

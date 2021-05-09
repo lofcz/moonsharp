@@ -71,6 +71,8 @@ namespace MoonSharp.Interpreter.Tree
 
 			Token forTkn = CheckTokenType(lcontext, TokenType.For);
 
+			CheckTokenTypeAndDiscard(lcontext, TokenType.Brk_Open_Round);
+
 			Token name = CheckTokenType(lcontext, TokenType.Name);
 
 			if (lcontext.Lexer.Current.Type == TokenType.Op_Assignment)
