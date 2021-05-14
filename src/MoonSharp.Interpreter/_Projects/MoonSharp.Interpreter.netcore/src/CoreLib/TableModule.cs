@@ -41,7 +41,7 @@ namespace MoonSharp.Interpreter.CoreLib
 			DynValue v = DynValue.NewTable(t);
 
 			for (int i = 0; i < args.Count; i++)
-				t.Set(i + 1, args[i]);
+				t.Set(i + 0, args[i]);
 
 			t.Set("n", DynValue.NewNumber(args.Count));
 
@@ -61,8 +61,13 @@ namespace MoonSharp.Interpreter.CoreLib
 
 			List<DynValue> values = new List<DynValue>();
 
-			for (int i = 1; i <= end; i++)
-				values.Add(vlist.Table.Get(i));
+			for (int i = 0; i < end; i++)
+            {
+				DynValue d = vlist.Table.Get(i);
+				if (d != DynValue.Nil) {
+					values.Add(d);
+				}
+            }
 
 			try
 			{
@@ -76,7 +81,7 @@ namespace MoonSharp.Interpreter.CoreLib
 
 			for (int i = 0; i < values.Count; i++)
 			{
-				vlist.Table.Set(i + 1, values[i]);
+				vlist.Table.Set(i + 0, values[i]);
 			}
 
 			return vlist;
@@ -144,7 +149,7 @@ namespace MoonSharp.Interpreter.CoreLib
 			if (vvalue.IsNil())
 			{
 				vvalue = vpos;
-				vpos = DynValue.NewNumber(len + 1);
+				vpos = DynValue.NewNumber(len); // + 1
 			}
 
 			if (vpos.Type != DataType.Number)
@@ -152,7 +157,7 @@ namespace MoonSharp.Interpreter.CoreLib
 
 			int pos = (int)vpos.Number;
 
-			if (pos > len + 1 || pos < 1)
+			if (pos > len + 1 || pos < 0)
 				throw new ScriptRuntimeException("bad argument #2 to 'insert' (position out of bounds)");
 
 			for (int i = len; i >= pos; i--)
@@ -181,7 +186,7 @@ namespace MoonSharp.Interpreter.CoreLib
 
 			int pos = vpos.IsNil() ? len : (int)vpos.Number;
 
-			if (pos >= len + 1 || (pos < 1 && len > 0))
+			if (pos >= len + 1 || (pos < 0 && len > 0))
 				throw new ScriptRuntimeException("bad argument #1 to 'remove' (position out of bounds)");
 
 			for (int i = pos; i <= len; i++)

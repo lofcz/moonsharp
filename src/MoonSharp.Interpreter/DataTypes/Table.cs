@@ -42,7 +42,7 @@ namespace MoonSharp.Interpreter
 		{
 			for (int i = 0; i < arrayValues.Length; i++)
 			{
-				this.Set(DynValue.NewNumber(i + 1), arrayValues[i]);
+				this.Set(DynValue.NewNumber(i + 0), arrayValues[i]);
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace MoonSharp.Interpreter
 		{
 			int v = ((int)d);
 
-			if (d >= 1.0 && d == v)
+			if (d >= 0.0 && d == v)
 				return v;
 
 			return -1;
@@ -252,7 +252,7 @@ namespace MoonSharp.Interpreter
 			{
 				int idx = GetIntegralKey(key.Number);
 
-				if (idx > 0)
+				if (idx >= 0)
 				{
 					Set(idx, value);
 					return;
@@ -398,7 +398,7 @@ namespace MoonSharp.Interpreter
 			if (key.Type == DataType.Number)
 			{
 				int idx = GetIntegralKey(key.Number);
-				if (idx > 0)
+				if (idx >= 0)
 					return RawGet(idx);
 			}
 
@@ -489,7 +489,7 @@ namespace MoonSharp.Interpreter
 			if (key.Type == DataType.Number)
 			{
 				int idx = GetIntegralKey(key.Number);
-				if (idx > 0)
+				if (idx >= 0)
 					return Remove(idx);
 			}
 
@@ -578,7 +578,7 @@ namespace MoonSharp.Interpreter
 			{
 				int idx = GetIntegralKey(v.Number);
 
-				if (idx > 0)
+				if (idx >= 0)
 				{
 					return GetNextOf(m_ArrayMap.Find(idx));
 				}
@@ -616,8 +616,8 @@ namespace MoonSharp.Interpreter
 				{
 					m_CachedLength = 0;
 
-					for (int i = 1; m_ArrayMap.ContainsKey(i) && !m_ArrayMap.Find(i).Value.Value.IsNil(); i++)
-						m_CachedLength = i;
+					for (int i = 0; m_ArrayMap.ContainsKey(i) && !m_ArrayMap.Find(i).Value.Value.IsNil(); i++)
+						m_CachedLength = i + 1;
 				}
 
 				return m_CachedLength;
@@ -633,7 +633,7 @@ namespace MoonSharp.Interpreter
 			}
 			else
 			{
-				Set(++m_InitArray, val.ToScalar());
+				Set(m_InitArray++, val.ToScalar());
 			}
 		}
 
