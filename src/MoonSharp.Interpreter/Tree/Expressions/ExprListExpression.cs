@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
-using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -23,16 +22,10 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 		public override void Compile(Execution.VM.ByteCode bc)
 		{
 			foreach (var exp in expressions)
-				exp.CompilePossibleLiteral(bc);
+				exp.Compile(bc);
 
 			if (expressions.Count > 1)
 				bc.Emit_MkTuple(expressions.Count);
-		}
-
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			dv = null;
-			return false;
 		}
 
 		public override DynValue Eval(ScriptExecutionContext context)

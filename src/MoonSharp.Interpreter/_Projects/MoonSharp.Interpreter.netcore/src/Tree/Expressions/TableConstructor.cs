@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
-using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -53,12 +52,6 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			}
 
 			CheckTokenType(lcontext, TokenType.Brk_Close_Curly);
-		}
-
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			dv = null;
-			return false;
 		}
 
 		private void MapField(ScriptLoadingContext lcontext)

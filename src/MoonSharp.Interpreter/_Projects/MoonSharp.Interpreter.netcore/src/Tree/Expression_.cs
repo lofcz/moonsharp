@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Tree.Expressions;
-using MoonSharp.Interpreter.DataStructs;
-using MoonSharp.Interpreter.Execution.VM;
 
 namespace MoonSharp.Interpreter.Tree
 {
@@ -16,18 +13,6 @@ namespace MoonSharp.Interpreter.Tree
 		public virtual string GetFriendlyDebugName()
 		{
 			return null;
-		}
-
-		public abstract bool EvalLiteral(out DynValue dv);
-
-		public void CompilePossibleLiteral(ByteCode bc)
-		{
-			if (EvalLiteral(out var dv))
-			{
-				if(dv == null) throw new NullReferenceException("Invalid literal: null");
-				bc.Emit_Literal(dv);
-			}
-			else Compile(bc);
 		}
 
 		public abstract DynValue Eval(ScriptExecutionContext context);

@@ -137,7 +137,7 @@ namespace MoonSharp.Interpreter
 
 		private void SignalByteCodeChange()
 		{
-			if (m_Debugger != null && (m_Debugger.GetDebuggerCaps() & DebuggerCaps.CanDebugByteCode) != 0)
+			if (m_Debugger != null)
 			{
 				m_Debugger.SetByteCode(m_ByteCode.Code.Select(s => s.ToString()).ToArray());
 			}
@@ -145,7 +145,7 @@ namespace MoonSharp.Interpreter
 
 		private void SignalSourceCodeChange(SourceCode source)
 		{
-			if (m_Debugger != null && (m_Debugger.GetDebuggerCaps() & DebuggerCaps.CanDebugByteCode) != 0)
+			if (m_Debugger != null)
 			{
 				m_Debugger.SetSourceCode(source);
 			}

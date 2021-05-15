@@ -83,11 +83,11 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			bc.LoopTracker.Loops.Push(L);
 
-			m_End.CompilePossibleLiteral(bc);
+			m_End.Compile(bc);
 			bc.Emit_ToNum(3);
 			m_Step.Compile(bc);
 			bc.Emit_ToNum(2);
-			m_Start.CompilePossibleLiteral(bc);
+			m_Start.Compile(bc);
 			bc.Emit_ToNum(1);
 
 			int start = bc.GetJumpPointForNextInstruction();

@@ -299,7 +299,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 		public override void Compile(Execution.VM.ByteCode bc)
 		{
-			m_Exp1.CompilePossibleLiteral(bc);
+			m_Exp1.Compile(bc);
 
 			if (m_Operator == Operator.Or)
 			{
@@ -312,7 +312,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			if (m_Operator == Operator.And)
 			{
 				Instruction i = bc.Emit_Jump(OpCode.JfOrPop, -1);
-				m_Exp2.CompilePossibleLiteral(bc);
+				m_Exp2.Compile(bc);
 				i.NumVal = bc.GetJumpPointForNextInstruction();
 				return;
 			}
@@ -320,57 +320,13 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 			if (m_Exp2 != null)
 			{
-				m_Exp2.CompilePossibleLiteral(bc);
+				m_Exp2.Compile(bc);
 			}
 
 			bc.Emit_Operator(OperatorToOpCode(m_Operator));
 
 			if (ShouldInvertBoolean(m_Operator))
 				bc.Emit_Operator(OpCode.Not);
-		}
-
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			dv = null;
-			if (!m_Exp1.EvalLiteral(out var v1))
-				return false;
-			v1 = v1.ToScalar();
-			if (!m_Exp2.EvalLiteral(out var v2))
-				return false;
-			v2 = v2.ToScalar();
-			if (m_Operator == Operator.Or)
-			{
-				if (v1.CastToBool())
-					dv = v1;
-				else 
-					dv = v2;
-			}
-			else if (m_Operator == Operator.And)
-			{
-				if (!v1.CastToBool())
-					dv = v1;
-				else
-					dv = v2;
-			}
-			else if ((m_Operator & COMPARES) != 0)
-			{
-				dv  = DynValue.NewBoolean(EvalComparison(v1, v2, m_Operator));
-			}
-			else if (m_Operator == Operator.StrConcat)
-			{
-				string s1 = v1.CastToString();
-				string s2 = v2.CastToString();
-
-				if (s1 == null || s2 == null)
-					throw new DynamicExpressionException("Attempt to perform concatenation on non-strings.");
-
-				dv = DynValue.NewString(s1 + s2);
-			}
-			else
-			{
-				dv = DynValue.NewNumber(EvalArithmetic(v1, v2));
-			}
-			return true;
 		}
 
 		public override DynValue Eval(ScriptExecutionContext context)
@@ -442,8 +398,6 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 						if (mod < 0) mod += d2;
 						return mod;
 					}
-				case Operator.Power:
-					return Math.Pow(d1, d2);
 				default:
 					throw new DynamicExpressionException("Unsupported operator {0}", m_Operator);
 			}

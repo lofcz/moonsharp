@@ -1,6 +1,5 @@
 ﻿using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
-using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -25,11 +24,6 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			m_Name = name;
 		}
 
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			dv = null;
-			return false;
-		}
 
 		public override void Compile(ByteCode bc)
 		{

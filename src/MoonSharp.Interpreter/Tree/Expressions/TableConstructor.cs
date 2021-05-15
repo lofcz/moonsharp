@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
-using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -89,11 +88,6 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			m_PositionalValues.Add(e);
 		}
 
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			dv = null;
-			return false;
-		}
 
 		public override void Compile(Execution.VM.ByteCode bc)
 		{

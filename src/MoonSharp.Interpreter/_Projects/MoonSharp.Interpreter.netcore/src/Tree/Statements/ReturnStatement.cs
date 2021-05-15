@@ -51,7 +51,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 			{
 				if (m_Expression != null)
 				{
-					m_Expression.CompilePossibleLiteral(bc);
+					m_Expression.Compile(bc);
 					bc.Emit_Ret(1);
 				}
 				else

@@ -650,12 +650,7 @@ namespace MoonSharp.Interpreter
 					return Table == other.Table;
 				case DataType.Tuple:
 				case DataType.TailCallRequest:
-					if (Tuple.Length != other.Tuple.Length)
-						return false;
-					for(int i = 0; i < Tuple.Length; i++)
-						if (!Equals(Tuple[i], other.Tuple[i]))
-							return false;
-					return true;
+					return Tuple == other.Tuple;
 				case DataType.Thread:
 					return Coroutine == other.Coroutine;
 				case DataType.UserData:
@@ -714,13 +709,6 @@ namespace MoonSharp.Interpreter
 			}
 			else if (rv.Type == DataType.String)
 			{
-				if (rv.String.StartsWith("0x"))
-				{
-					if (long.TryParse(rv.String, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out long value))
-						return value;
-					return null;
-				}
-
 				double num;
 				if (double.TryParse(rv.String, NumberStyles.Any, CultureInfo.InvariantCulture, out num))
 					return num;

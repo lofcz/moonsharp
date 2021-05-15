@@ -1,5 +1,5 @@
-﻿using MoonSharp.Interpreter.DataStructs;
-using MoonSharp.Interpreter.Execution;
+﻿using MoonSharp.Interpreter.Execution;
+
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -22,16 +22,6 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 		public override DynValue Eval(ScriptExecutionContext context)
 		{
 			return expression.Eval(context).ToScalar();
-		}
-
-		public override bool EvalLiteral(out DynValue dv)
-		{
-			if (expression.EvalLiteral(out dv))
-			{
-				dv = dv.ToScalar();
-				return true;
-			}
-			return false;
 		}
 	}
 }
