@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
-
+using MoonSharp.Interpreter.DataStructs;
 using MoonSharp.Interpreter.Tree.Statements;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
@@ -98,6 +98,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 			lcontext.Lexer.Next();
 			return s;
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = null;
+			return false;
 		}
 
 		private List<string> BuildParamList(ScriptLoadingContext lcontext, bool pushSelfParam, Token openBracketToken, bool isLambda)

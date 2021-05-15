@@ -1,4 +1,5 @@
 ﻿using MoonSharp.Interpreter.Execution;
+using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -50,6 +51,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 				throw new SyntaxErrorException(t, "unknown literal format near '{0}'", t.Text);
 
 			lcontext.Lexer.Next();
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = m_Value;
+			return true;
 		}
 
 		public override void Compile(Execution.VM.ByteCode bc)

@@ -1,4 +1,5 @@
 ﻿using MoonSharp.Interpreter.Execution;
+using MoonSharp.Interpreter.DataStructs;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
@@ -29,6 +30,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			}
 
 			lcontext.Lexer.Next();
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = null;
+			return false;
 		}
 
 		public SymbolRefExpression(ScriptLoadingContext lcontext, SymbolRef refr)

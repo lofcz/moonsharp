@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
+using MoonSharp.Interpreter.DataStructs;
 
 using MoonSharp.Interpreter.Tree.Statements;
 
@@ -182,6 +183,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			}
 
 			return SymbolRef.Upvalue(symbol.i_Name, m_Closure.Count - 1);
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = null;
+			return false;
 		}
 
 		public override DynValue Eval(ScriptExecutionContext context)
