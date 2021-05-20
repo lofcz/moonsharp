@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -36,6 +37,8 @@ namespace MoonSharp.Interpreter
 		Table m_GlobalTable;
 		IDebugger m_Debugger;
 		Table[] m_TypeMetatables = new Table[(int)LuaTypeExtensions.MaxMetaTypes];
+
+		public Dictionary<string, object> Data {get; set;} = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Initializes the <see cref="Script"/> class.

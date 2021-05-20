@@ -39,6 +39,7 @@ namespace MoonSharp.Interpreter
 		/// Gets the numeric value (valid only if the <see cref="Type"/> is <see cref="DataType.Number"/>)
 		/// </summary>
 		public double Number { get { return m_Number; } }
+		public int Int { get { return (int)m_Number; } }
 		/// <summary>
 		/// Gets the values in the tuple (valid only if the <see cref="Type"/> is Tuple).
 		/// This field is currently also used to hold arguments in values whose <see cref="Type"/> is <see cref="DataType.TailCallRequest"/>.

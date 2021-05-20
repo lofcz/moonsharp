@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -78,6 +79,8 @@ namespace MoonSharp.Interpreter
 		}
 
 
+		public Dictionary<string, object> Data {get; set;} = new Dictionary<string, object>();
+
 		/// <summary>
 		/// Gets or sets the script loader which will be used as the value of the
 		/// ScriptLoader property for all newly created scripts.
@@ -137,7 +140,7 @@ namespace MoonSharp.Interpreter
 
 		private void SignalByteCodeChange()
 		{
-			if (m_Debugger != null)
+			if (m_Debugger != null && (m_Debugger.GetDebuggerCaps() & DebuggerCaps.CanDebugByteCode) != 0)
 			{
 				m_Debugger.SetByteCode(m_ByteCode.Code.Select(s => s.ToString()).ToArray());
 			}
@@ -145,7 +148,7 @@ namespace MoonSharp.Interpreter
 
 		private void SignalSourceCodeChange(SourceCode source)
 		{
-			if (m_Debugger != null)
+			if (m_Debugger != null && (m_Debugger.GetDebuggerCaps() & DebuggerCaps.CanDebugByteCode) != 0)
 			{
 				m_Debugger.SetSourceCode(source);
 			}
