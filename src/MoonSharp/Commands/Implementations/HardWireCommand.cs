@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MoonSharp.Hardwire;
-using MoonSharp.Hardwire.Languages;
 using MoonSharp.Interpreter;
 
 namespace MoonSharp.Commands.Implementations
 {
 	class HardWireCommand : ICommand
 	{
-		class ConsoleLogger : ICodeGenerationLogger
+		class ConsoleLogger 
 		{
 			public int Errors = 0;
 			public int Warnings = 0;
@@ -121,20 +119,9 @@ namespace MoonSharp.Commands.Implementations
 				var eee = s.CreateDynamicExpression(File.ReadAllText(luafile));
 
 				Table t = eee.Evaluate(null).Table;
+		
 
-				HardwireGeneratorRegistry.RegisterPredefined();
-
-				HardwireGenerator hcg = new HardwireGenerator(namespacename ?? "HardwiredClasses", classname ?? "HardwireTypes", logger,
-					language == "vb" ? HardwireCodeGenerationLanguage.VB : HardwireCodeGenerationLanguage.CSharp)
-				{
-					AllowInternals = allowInternals
-				};
-
-				hcg.BuildCodeModel(t);
-
-				string code = hcg.GenerateSourceCode();
-
-				File.WriteAllText(destfile, code);
+				File.WriteAllText(destfile, "");
 			}
 			catch (Exception ex)
 			{

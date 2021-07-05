@@ -61,6 +61,7 @@ namespace MoonSharp
 
 		private static void InterpreterLoop(ReplInterpreter interpreter, ShellContext shellContext)
 		{
+			Console.OutputEncoding = Console.InputEncoding = Encoding.Unicode;
 			Console.Write(interpreter.ClassicPrompt + " ");
 
 			string s = Console.ReadLine();

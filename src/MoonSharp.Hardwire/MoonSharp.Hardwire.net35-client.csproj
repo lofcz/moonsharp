@@ -63,13 +63,13 @@
     <Compile Include="Utils\HardwireParameterDescriptor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MoonSharp.Interpreter\MoonSharp.Interpreter.net35-client.csproj">
-      <Project>{91ea9b9d-fe03-4273-bdaf-8ad42ede1e59}</Project>
-      <Name>MoonSharp.Interpreter.net35-client</Name>
-    </ProjectReference>
+    <None Include="keypair.snk" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="keypair.snk" />
+    <ProjectReference Include="..\MoonSharp.Interpreter\_Projects\MoonSharp.Interpreter.net40-client\MoonSharp.Interpreter.net40-client.csproj">
+      <Project>{88d2880c-a863-4b16-abef-f67bd1e98bd1}</Project>
+      <Name>MoonSharp.Interpreter.net40-client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
