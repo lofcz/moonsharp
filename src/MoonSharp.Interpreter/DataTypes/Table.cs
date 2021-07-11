@@ -154,7 +154,7 @@ namespace MoonSharp.Interpreter
 		public void Append(DynValue value)
 		{
 			this.CheckScriptOwnership(value);
-			PerformTableSet(m_ArrayMap, Length + 1, DynValue.NewNumber(Length + 1), value, true, Length + 1);
+			PerformTableSet(m_ArrayMap, Length + 0, DynValue.NewNumber(Length + 0), value, true, Length + 0);
 		}
 
 		#region Set
