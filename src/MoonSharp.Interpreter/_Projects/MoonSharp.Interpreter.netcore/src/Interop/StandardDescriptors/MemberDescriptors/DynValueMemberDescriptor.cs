@@ -32,7 +32,7 @@ namespace MoonSharp.Interpreter.Interop
 		protected DynValueMemberDescriptor(string name)
 		{
 			MemberAccess = MemberDescriptorAccess.CanRead;
-			m_Value = null;
+			m_Value = DynValue.Nil;
 			Name = name;
 		}
 
@@ -60,17 +60,17 @@ namespace MoonSharp.Interpreter.Interop
 		/// <summary>
 		/// Gets the name of the member
 		/// </summary>
-		public string Name { get; private set;  }
+		public string Name { get; private set; }
 		/// <summary>
 		/// Gets the types of access supported by this member
 		/// </summary>
-		public MemberDescriptorAccess MemberAccess { get; private set;  }
+		public MemberDescriptorAccess MemberAccess { get; private set; }
 
 
 		/// <summary>
 		/// Gets the value wrapped by this descriptor
 		/// </summary>
-		public virtual DynValue Value 
+		public virtual DynValue Value
 		{
 			get
 			{

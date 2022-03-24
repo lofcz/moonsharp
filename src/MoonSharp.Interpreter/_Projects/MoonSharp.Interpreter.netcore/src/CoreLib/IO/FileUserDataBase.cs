@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MoonSharp.Interpreter.Compatibility;
 
 namespace MoonSharp.Interpreter.CoreLib.IO
 {
@@ -14,7 +13,7 @@ namespace MoonSharp.Interpreter.CoreLib.IO
 		{
 			List<DynValue> readLines = new List<DynValue>();
 
-			DynValue readValue = null;
+			DynValue readValue;
 
 			do
 			{
@@ -56,7 +55,7 @@ namespace MoonSharp.Interpreter.CoreLib.IO
 						string str = ReadBuffer(howmany);
 						v = DynValue.NewString(str);
 					}
-					else 
+					else
 					{
 						string opt = args.AsType(i, "read", DataType.String, false).String;
 
@@ -90,7 +89,7 @@ namespace MoonSharp.Interpreter.CoreLib.IO
 
 							str = str.TrimEnd('\n', '\r');
 							str += "\n";
-							
+
 							v = DynValue.NewString(str);
 						}
 						else
@@ -191,10 +190,10 @@ namespace MoonSharp.Interpreter.CoreLib.IO
 				return numAsFar.Length == 0;
 
 			if (c == '.')
-				return !Framework.Do.StringContainsChar(numAsFar, '.');
+				return !numAsFar.Contains('.');
 
 			if (c == 'E' || c == 'e')
-				return !(Framework.Do.StringContainsChar(numAsFar, 'E') || Framework.Do.StringContainsChar(numAsFar, 'e'));
+				return !(numAsFar.Contains('E') || numAsFar.Contains('e'));
 
 			return false;
 		}
@@ -211,7 +210,7 @@ namespace MoonSharp.Interpreter.CoreLib.IO
 		protected abstract string Close();
 
 		public abstract bool flush();
-		public abstract long seek(string whence, long offset);
+		public abstract long seek(string whence, long offset = 0);
 		public abstract bool setvbuf(string mode);
 
 		public override string ToString()

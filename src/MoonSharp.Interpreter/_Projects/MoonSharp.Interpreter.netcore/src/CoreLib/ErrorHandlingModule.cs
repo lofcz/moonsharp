@@ -14,12 +14,12 @@ namespace MoonSharp.Interpreter.CoreLib
 		[MoonSharpModuleMethod]
 		public static DynValue pcall(ScriptExecutionContext executionContext, CallbackArguments args)
 		{
-			return SetErrorHandlerStrategy("pcall", executionContext, args, null);
+			return SetErrorHandlerStrategy("pcall", executionContext, args, DynValue.Nil);
 		}
 
 
-		private static DynValue SetErrorHandlerStrategy(string funcName, 
-			ScriptExecutionContext executionContext, 
+		private static DynValue SetErrorHandlerStrategy(string funcName,
+			ScriptExecutionContext executionContext,
 			CallbackArguments args,
 			DynValue handlerBeforeUnwind)
 		{
@@ -95,7 +95,7 @@ namespace MoonSharp.Interpreter.CoreLib
 
 		public static DynValue pcall_continuation(ScriptExecutionContext executionContext, CallbackArguments args)
 		{
-			return MakeReturnTuple(true, args);			
+			return MakeReturnTuple(true, args);
 		}
 
 		public static DynValue pcall_onerror(ScriptExecutionContext executionContext, CallbackArguments args)
@@ -115,7 +115,7 @@ namespace MoonSharp.Interpreter.CoreLib
 					a.Add(args[i]);
 			}
 
-			DynValue handler = null;
+			DynValue handler = DynValue.Nil;
 			if (args[1].Type == DataType.Function || args[1].Type == DataType.ClrFunction)
 			{
 				handler = args[1];

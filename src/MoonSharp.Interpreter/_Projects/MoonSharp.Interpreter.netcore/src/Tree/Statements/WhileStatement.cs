@@ -59,18 +59,18 @@ namespace MoonSharp.Interpreter.Tree.Statements
 			bc.PopSourceRef();
 			bc.Emit_Debug("..end");
 			bc.PushSourceRef(m_End);
-	
+
 			bc.Emit_Leave(m_StackFrame);
 			bc.Emit_Jump(OpCode.Jump, start);
-			
+
 			bc.LoopTracker.Loops.Pop();
 
 			int exitpoint = bc.GetJumpPointForNextInstruction();
 
-			foreach (Instruction i in L.BreakJumps)
-				i.NumVal = exitpoint;
+			foreach (int i in L.BreakJumps)
+				bc.SetNumVal(i, exitpoint);
 
-			jumpend.NumVal = exitpoint;
+			bc.SetNumVal(jumpend, exitpoint);
 
 			bc.PopSourceRef();
 		}

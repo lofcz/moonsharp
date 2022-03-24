@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Tree.Expressions;
+using MoonSharp.Interpreter.DataStructs;
+using MoonSharp.Interpreter.Execution.VM;
 
 namespace MoonSharp.Interpreter.Tree
 {
@@ -16,6 +19,17 @@ namespace MoonSharp.Interpreter.Tree
 		}
 
 		public abstract DynValue Eval(ScriptExecutionContext context);
+
+		public abstract bool EvalLiteral(out DynValue dv);
+
+		public void CompilePossibleLiteral(ByteCode bc)
+		{
+			if (EvalLiteral(out var dv))
+			{
+				bc.Emit_Literal(dv);
+			}
+			else Compile(bc);
+		}
 
 		public virtual SymbolRef FindDynamic(ScriptExecutionContext context)
 		{
@@ -52,7 +66,7 @@ namespace MoonSharp.Interpreter.Tree
 				lcontext.Lexer.Next();
 			}
 
-			return exps; 
+			return exps;
 		}
 
 		internal static Expression Expr(ScriptLoadingContext lcontext)

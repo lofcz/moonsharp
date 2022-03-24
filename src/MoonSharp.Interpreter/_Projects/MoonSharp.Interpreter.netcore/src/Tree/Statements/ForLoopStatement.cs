@@ -1,7 +1,7 @@
 ﻿using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using MoonSharp.Interpreter.Tree.Expressions;
 
@@ -29,11 +29,9 @@ namespace MoonSharp.Interpreter.Tree.Statements
 			CheckTokenType(lcontext, TokenType.Comma, TokenType.SemiColon);
 
 			if (CheckTokenTypeAndDiscardIfMatch(lcontext, TokenType.Name, nameToken.Text))
-            {
+			{
 				CheckTokenTypeAndDiscardIfNot(lcontext, TokenTypeUtils.operators);
-            }
-
-
+			}
 			m_End = Expression.Expr(lcontext);
 
 			if (lcontext.Lexer.Current.Type == TokenType.Comma || lcontext.Lexer.Current.Type == TokenType.SemiColon)
@@ -61,9 +59,9 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			lcontext.Scope.PushBlock();
 			m_VarName = lcontext.Scope.DefineLocal(nameToken.Text);
-			
+
 			forToken.GetSourceRef(CheckTokenTypeAndDiscard(lcontext, TokenType.Brk_Close_Round));
-			
+
 			m_RefFor = forToken.GetSourceRef(CheckTokenType(lcontext, TokenType.Do));
 			m_InnerBlock = new CompositeStatement(lcontext);
 			m_RefEnd = CheckTokenType(lcontext, TokenType.End).GetSourceRef();
@@ -71,7 +69,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			lcontext.Source.Refs.Add(m_RefFor);
 			lcontext.Source.Refs.Add(m_RefEnd);
-		}		
+		}
 
 
 		public override void Compile(ByteCode bc)
@@ -85,17 +83,13 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			bc.LoopTracker.Loops.Push(L);
 
-			m_End.Compile(bc);
-			bc.Emit_ToNum(3);
+			m_End.CompilePossibleLiteral(bc);
 			m_Step.Compile(bc);
-			bc.Emit_ToNum(2);
-			m_Start.Compile(bc);
-			bc.Emit_ToNum(1);
+			m_Start.CompilePossibleLiteral(bc);
 
 			int start = bc.GetJumpPointForNextInstruction();
 			var jumpend = bc.Emit_Jump(OpCode.JFor, -1);
 			bc.Emit_Enter(m_StackFrame);
-			//bc.Emit_SymStorN(m_VarName);
 
 			bc.Emit_Store(m_VarName, 0, 0);
 
@@ -113,10 +107,10 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			int exitpoint = bc.GetJumpPointForNextInstruction();
 
-			foreach (Instruction i in L.BreakJumps)
-				i.NumVal = exitpoint;
+			foreach (int i in L.BreakJumps)
+				bc.SetNumVal(i, exitpoint);
 
-			jumpend.NumVal = exitpoint;
+			bc.SetNumVal(jumpend, exitpoint);
 			bc.Emit_Pop(3);
 
 			bc.PopSourceRef();

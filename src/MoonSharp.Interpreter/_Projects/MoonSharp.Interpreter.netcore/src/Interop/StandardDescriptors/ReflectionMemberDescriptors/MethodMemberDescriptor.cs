@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using MoonSharp.Interpreter.Compatibility;
 using MoonSharp.Interpreter.Diagnostics;
 using MoonSharp.Interpreter.Interop.BasicDescriptors;
 
@@ -57,7 +56,7 @@ namespace MoonSharp.Interpreter.Interop
 
 			ParameterInfo[] reflectionParams = methodBase.GetParameters();
 			ParameterDescriptor[] parameters;
-			
+
 			if (this.MethodInfo.DeclaringType.IsArray)
 			{
 				m_IsArrayCtor = true;
@@ -73,8 +72,8 @@ namespace MoonSharp.Interpreter.Interop
 			{
 				parameters = reflectionParams.Select(pi => new ParameterDescriptor(pi)).ToArray();
 			}
-		
-			
+
+
 			bool isExtensionMethod = (methodBase.IsStatic && parameters.Length > 0 && methodBase.GetCustomAttributes(typeof(ExtensionAttribute), false).Any());
 
 			base.Initialize(methodBase.Name, isStatic, parameters, isExtensionMethod);
@@ -156,7 +155,7 @@ namespace MoonSharp.Interpreter.Interop
 					return false;
 				}
 
-				if (Framework.Do.IsGenericTypeDefinition(mi.ReturnType))
+				if (mi.ReturnType.IsGenericTypeDefinition)
 				{
 					if (throwException) throw new ArgumentException("Method cannot have an unresolved generic return type");
 					return false;
@@ -306,7 +305,7 @@ namespace MoonSharp.Interpreter.Interop
 
 			t.Set("params", pars);
 
-			int i = 0; 
+			int i = 0;
 
 			foreach (var p in Parameters)
 			{

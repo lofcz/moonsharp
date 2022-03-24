@@ -37,7 +37,7 @@ namespace MoonSharp.Interpreter.Loaders
 		/// <returns></returns>
 		protected virtual string ResolveModuleName(string modname, string[] paths)
 		{
-			if (paths == null) 
+			if (paths == null)
 				return null;
 
 			modname = modname.Replace('.', '/');
@@ -68,7 +68,7 @@ namespace MoonSharp.Interpreter.Loaders
 			{
 				DynValue s = globalContext.RawGet("LUA_PATH");
 
-				if (s != null && s.Type == DataType.String)
+				if (s.Type == DataType.String)
 					return ResolveModuleName(modname, UnpackStringPaths(s.String));
 			}
 

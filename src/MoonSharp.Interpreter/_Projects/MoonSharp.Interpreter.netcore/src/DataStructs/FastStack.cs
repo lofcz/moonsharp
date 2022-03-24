@@ -13,10 +13,14 @@ namespace MoonSharp.Interpreter.DataStructs
 	{
 		T[] m_Storage;
 		int m_HeadIdx = 0;
+		private int maxCapacity;
 
-		public FastStack(int maxCapacity)
+		public int MaxCapacity => maxCapacity;
+
+		public FastStack(int initialCapacity, int maxCapacity)
 		{
-			m_Storage = new T[maxCapacity];
+			m_Storage = new T[initialCapacity];
+			this.maxCapacity = maxCapacity;
 		}
 
 		public T this[int index]
@@ -25,14 +29,32 @@ namespace MoonSharp.Interpreter.DataStructs
 			set { m_Storage[index] = value; }
 		}
 
+		void Grow(int newSize)
+		{
+			if (newSize < m_Storage.Length) return;
+			if (newSize > maxCapacity)
+			{
+				throw new OutOfMemoryException($"Trying to grow stack beyond Max Capacity ({newSize} > {maxCapacity}).");
+			}
+			int sz = m_Storage.Length;
+			while (newSize > sz)
+			{
+				sz *= 2;
+			}
+			if (sz >= maxCapacity) sz = maxCapacity;
+			Array.Resize(ref m_Storage, sz);
+		}
+
 		public T Push(T item)
 		{
+			Grow(m_HeadIdx + 1);
 			m_Storage[m_HeadIdx++] = item;
 			return item;
 		}
 
 		public void Expand(int size)
 		{
+			Grow(m_HeadIdx + size);
 			m_HeadIdx += size;
 		}
 
@@ -46,10 +68,10 @@ namespace MoonSharp.Interpreter.DataStructs
 			m_Storage[index] = default(T);
 		}
 
-		public T Peek(int idxofs = 0)
+		public ref T Peek(int idxofs = 0)
 		{
-			T item = m_Storage[m_HeadIdx - 1 - idxofs];
-			return item;
+			ref T item = ref m_Storage[m_HeadIdx - 1 - idxofs];
+			return ref item;
 		}
 
 		public void Set(int idxofs, T item)
@@ -62,7 +84,7 @@ namespace MoonSharp.Interpreter.DataStructs
 			RemoveLast(Count - p);
 		}
 
-		public void RemoveLast( int cnt = 1)
+		public void RemoveLast(int cnt = 1)
 		{
 			if (cnt == 1)
 			{

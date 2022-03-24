@@ -1,10 +1,11 @@
-﻿using MoonSharp.Interpreter.Execution;
+﻿using MoonSharp.Interpreter.DataStructs;
+using MoonSharp.Interpreter.Execution;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
 	class LiteralExpression : Expression
 	{
-		DynValue m_Value;
+		DynValue m_Value = DynValue.Void;
 
 		public DynValue Value
 		{
@@ -27,11 +28,11 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 				case TokenType.Number:
 				case TokenType.Number_Hex:
 				case TokenType.Number_HexFloat:
-					m_Value = DynValue.NewNumber(t.GetNumberValue()).AsReadOnly();
+					m_Value = DynValue.NewNumber(t.GetNumberValue());
 					break;
 				case TokenType.String:
 				case TokenType.String_Long:
-					m_Value = DynValue.NewString(t.Text).AsReadOnly();
+					m_Value = DynValue.NewString(t.Text);
 					break;
 				case TokenType.True:
 					m_Value = DynValue.True;
@@ -46,7 +47,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 					throw new InternalErrorException("type mismatch");
 			}
 
-			if (m_Value == null)
+			if (m_Value.IsVoid())
 				throw new SyntaxErrorException(t, "unknown literal format near '{0}'", t.Text);
 
 			lcontext.Lexer.Next();
@@ -60,6 +61,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 		public override DynValue Eval(ScriptExecutionContext context)
 		{
 			return m_Value;
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = m_Value;
+			return true;
 		}
 	}
 }

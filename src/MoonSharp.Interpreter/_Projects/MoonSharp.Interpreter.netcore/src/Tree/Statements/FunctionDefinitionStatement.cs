@@ -25,7 +25,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 			// here lexer must be at the 'function' keyword
 			Token funcKeyword = CheckTokenType(lcontext, TokenType.Function);
 			funcKeyword = localToken ?? funcKeyword; // for debugger purposes
-			
+
 			m_Local = local;
 
 			if (m_Local)
@@ -55,7 +55,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 						if (separator.Type != TokenType.Colon && separator.Type != TokenType.Dot)
 							UnexpectedTokenType(separator);
-						
+
 						lcontext.Lexer.Next();
 
 						Token field = CheckTokenType(lcontext, TokenType.Name);
@@ -116,11 +116,11 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 			foreach (string str in m_TableAccessors)
 			{
-				bc.Emit_Index(DynValue.NewString(str), true);
+				bc.Emit_Index(str, true);
 				cnt += 1;
 			}
 
-			bc.Emit_IndexSet(0, 0, DynValue.NewString(m_MethodName), true);
+			bc.Emit_IndexSet(0, 0, m_MethodName, true);
 
 			return 1 + cnt;
 		}

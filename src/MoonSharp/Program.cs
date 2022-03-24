@@ -3,24 +3,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using MoonSharp.Commands;
 using MoonSharp.Commands.Implementations;
 using MoonSharp.Interpreter;
-using MoonSharp.Interpreter.Execution;
-using MoonSharp.Interpreter.Loaders;
 using MoonSharp.Interpreter.REPL;
-using MoonSharp.Interpreter.Serialization;
-using MoonSharp.RemoteDebugger;
-using MoonSharp.RemoteDebugger.Network;
 
 namespace MoonSharp
 {
 	class Program
 	{
 		[STAThread]
-		static void Main(string[] args)
+		static async Task Main(string[] args)
 		{
 			CommandManager.Initialize();
 
@@ -29,6 +26,8 @@ namespace MoonSharp
 			Script script = new Script(CoreModules.Preset_Complete);
 
 			script.Globals["makestatic"] = (Func<string, DynValue>)(MakeStatic);
+			script.Globals["mojeip"] = (Func<Task<DynValue>>)(GetMyIp);
+			script.Globals["mojeip_sync"] = (Func<DynValue>)(GetMyIpSync);
 
 			if (CheckArgs(args, new ShellContext(script)))
 				return;
@@ -48,6 +47,19 @@ namespace MoonSharp
 			}
 		}
 
+		private static async Task<DynValue> GetMyIp()
+        {
+			HttpClient client = new HttpClient();
+            string x = await client.GetStringAsync("https://lancraft.cz/mojeip");
+
+			return DynValue.NewString(x);
+        }
+
+		private static DynValue GetMyIpSync()
+		{
+			return DynValue.NewString("1");
+		}
+
 		private static DynValue MakeStatic(string type)
 		{
 			Type tt = Type.GetType(type);
@@ -61,7 +73,6 @@ namespace MoonSharp
 
 		private static void InterpreterLoop(ReplInterpreter interpreter, ShellContext shellContext)
 		{
-			Console.OutputEncoding = Console.InputEncoding = Encoding.Unicode;
 			Console.Write(interpreter.ClassicPrompt + " ");
 
 			string s = Console.ReadLine();
@@ -76,7 +87,7 @@ namespace MoonSharp
 			{
 				DynValue result = interpreter.Evaluate(s);
 
-				if (result != null && result.Type != DataType.Void)
+				if (result.Type != DataType.Void)
 					Console.WriteLine("{0}", result);
 			}
 			catch (InterpreterException ex)

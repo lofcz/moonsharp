@@ -651,7 +651,12 @@ namespace MoonSharp.Interpreter
 					return Table == other.Table;
 				case DataType.Tuple:
 				case DataType.TailCallRequest:
-					return Tuple == other.Tuple;
+					if (Tuple.Length != other.Tuple.Length)
+						return false;
+					for (int i = 0; i < Tuple.Length; i++)
+						if (!Equals(Tuple[i], other.Tuple[i]))
+							return false;
+					return true;
 				case DataType.Thread:
 					return Coroutine == other.Coroutine;
 				case DataType.UserData:

@@ -72,18 +72,18 @@ namespace MoonSharp.Interpreter.Tree.Statements
 
 		public override void Compile(Execution.VM.ByteCode bc)
 		{
-			List<Instruction> endJumps = new List<Instruction>();
+			List<int> endJumps = new List<int>();
 
-			Instruction lastIfJmp = null;
+			int lastIfJmp = -1;
 
 			foreach (var ifblock in m_Ifs)
 			{
 				using (bc.EnterSource(ifblock.Source))
 				{
-					if (lastIfJmp != null)
-						lastIfJmp.NumVal = bc.GetJumpPointForNextInstruction();
+					if (lastIfJmp != -1)
+						bc.SetNumVal(lastIfJmp, bc.GetJumpPointForNextInstruction());
 
-					ifblock.Exp.Compile(bc);
+					ifblock.Exp.CompilePossibleLiteral(bc);
 					lastIfJmp = bc.Emit_Jump(OpCode.Jf, -1);
 					bc.Emit_Enter(ifblock.StackFrame);
 					ifblock.Block.Compile(bc);
@@ -95,7 +95,7 @@ namespace MoonSharp.Interpreter.Tree.Statements
 				endJumps.Add(bc.Emit_Jump(OpCode.Jump, -1));
 			}
 
-			lastIfJmp.NumVal = bc.GetJumpPointForNextInstruction();
+			bc.SetNumVal(lastIfJmp, bc.GetJumpPointForNextInstruction());
 
 			if (m_Else != null)
 			{
@@ -109,8 +109,8 @@ namespace MoonSharp.Interpreter.Tree.Statements
 					bc.Emit_Leave(m_Else.StackFrame);
 			}
 
-			foreach(var endjmp in endJumps)
-				endjmp.NumVal = bc.GetJumpPointForNextInstruction();
+			foreach (var endjmp in endJumps)
+				bc.SetNumVal(endjmp, bc.GetJumpPointForNextInstruction());
 		}
 
 

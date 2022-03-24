@@ -68,13 +68,13 @@ namespace MoonSharp.Interpreter.REPL
 
 			try
 			{
-				DynValue result = null;
+				DynValue result = DynValue.Nil;
 
 				if (isFirstLine && HandleClassicExprsSyntax && m_CurrentCommand.StartsWith("="))
 				{
-					m_CurrentCommand = "return " + m_CurrentCommand.Substring(1); 
+					m_CurrentCommand = "return " + m_CurrentCommand.Substring(1);
 				}
-				
+
 				if (isFirstLine && HandleDynamicExprs && m_CurrentCommand.StartsWith("?"))
 				{
 					var code = m_CurrentCommand.Substring(1);
@@ -100,7 +100,7 @@ namespace MoonSharp.Interpreter.REPL
 				}
 				else
 				{
-					return null;
+					return DynValue.Nil;
 				}
 			}
 			catch (ScriptRuntimeException sre)

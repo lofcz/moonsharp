@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MoonSharp.Interpreter.Compatibility;
 using MoonSharp.Interpreter.DataStructs;
 using MoonSharp.Interpreter.Interop.BasicDescriptors;
 using MoonSharp.Interpreter.Interop.StandardDescriptors;
@@ -37,11 +36,11 @@ namespace MoonSharp.Interpreter.Interop
 			if (!CheckEventIsCompatible(ei, false))
 				return null;
 
-	        MethodInfo addm = Framework.Do.GetAddMethod(ei); 
-	        MethodInfo remm = Framework.Do.GetRemoveMethod(ei);
+			MethodInfo addm = ei.GetAddMethod();
+			MethodInfo remm = ei.GetRemoveMethod();
 
-	        if (ei.GetVisibilityFromAttributes() ?? ((remm != null && remm.IsPublic) && (addm != null && addm.IsPublic)))
-	            return new EventMemberDescriptor(ei, accessMode);
+			if (ei.GetVisibilityFromAttributes() ?? ((remm != null && remm.IsPublic) && (addm != null && addm.IsPublic)))
+				return new EventMemberDescriptor(ei, accessMode);
 
 			return null;
 		}
@@ -71,19 +70,19 @@ namespace MoonSharp.Interpreter.Interop
 		/// </exception>
 		public static bool CheckEventIsCompatible(EventInfo ei, bool throwException)
 		{
-			if (Framework.Do.IsValueType(ei.DeclaringType))
+			if (ei.DeclaringType.IsValueType)
 			{
 				if (throwException) throw new ArgumentException("Events are not supported on value types");
 				return false;
 			}
 
-			if ((Framework.Do.GetAddMethod(ei) == null) || (Framework.Do.GetRemoveMethod(ei) == null))
+			if ((ei.GetAddMethod() == null) || (ei.GetRemoveMethod() == null))
 			{
 				if (throwException) throw new ArgumentException("Event must have add and remove methods");
 				return false;
 			}
 
-			MethodInfo invoke = Framework.Do.GetMethod(ei.EventHandlerType, "Invoke");
+			MethodInfo invoke = ei.EventHandlerType.GetMethod("Invoke");
 
 			if (invoke == null)
 			{
@@ -110,7 +109,7 @@ namespace MoonSharp.Interpreter.Interop
 
 			foreach (ParameterInfo pi in pars)
 			{
-				if (Framework.Do.IsValueType(pi.ParameterType))
+				if (pi.ParameterType.IsValueType)
 				{
 					if (throwException) throw new ArgumentException("Event handler cannot have value type parameters");
 					return false;
@@ -135,8 +134,8 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			CheckEventIsCompatible(ei, true);
 			EventInfo = ei;
-			m_Add = Framework.Do.GetAddMethod(ei);
-			m_Remove = Framework.Do.GetRemoveMethod(ei);
+			m_Add = ei.GetAddMethod();
+			m_Remove = ei.GetRemoveMethod();
 			IsStatic = m_Add.IsStatic;
 		}
 
@@ -163,7 +162,7 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			this.CheckAccess(MemberDescriptorAccess.CanRead, obj);
 
-			if (IsStatic) 
+			if (IsStatic)
 				obj = this;
 
 			return UserData.Create(new EventFacade(this, obj));
@@ -201,16 +200,12 @@ namespace MoonSharp.Interpreter.Interop
 		private void RegisterCallback(object o)
 		{
 			m_Delegates.GetOrCreate(o, () =>
-				{
-					Delegate d = CreateDelegate(o);
-#if NETFX_CORE
-					Delegate handler = d.GetMethodInfo().CreateDelegate(EventInfo.EventHandlerType, d.Target);
-#else
-					Delegate handler = Delegate.CreateDelegate(EventInfo.EventHandlerType, d.Target, d.Method);
-#endif
-					m_Add.Invoke(o, new object[] { handler });
-					return handler;
-				}); 
+			{
+				Delegate d = CreateDelegate(o);
+				Delegate handler = Delegate.CreateDelegate(EventInfo.EventHandlerType, d.Target, d.Method);
+				m_Add.Invoke(o, new object[] { handler });
+				return handler;
+			});
 		}
 
 		private void UnregisterCallback(object o)
@@ -227,7 +222,7 @@ namespace MoonSharp.Interpreter.Interop
 
 		private Delegate CreateDelegate(object sender)
 		{
-			switch (Framework.Do.GetMethod(EventInfo.EventHandlerType, "Invoke").GetParameters().Length)
+			switch (EventInfo.EventHandlerType.GetMethod("Invoke").GetParameters().Length)
 			{
 				case 0:
 					return (EventWrapper00)(() => DispatchEvent(sender));
@@ -239,36 +234,36 @@ namespace MoonSharp.Interpreter.Interop
 					return (EventWrapper03)((o1, o2, o3) => DispatchEvent(sender, o1, o2, o3));
 				case 4:
 					return (EventWrapper04)((o1, o2, o3, o4) => DispatchEvent(sender, o1, o2, o3, o4));
-				case 5: 
+				case 5:
 					return (EventWrapper05)((o1, o2, o3, o4, o5) => DispatchEvent(sender, o1, o2, o3, o4, o5));
-				case 6: 
+				case 6:
 					return (EventWrapper06)((o1, o2, o3, o4, o5, o6) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6));
-				case 7: 
+				case 7:
 					return (EventWrapper07)((o1, o2, o3, o4, o5, o6, o7) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7));
-				case 8: 
+				case 8:
 					return (EventWrapper08)((o1, o2, o3, o4, o5, o6, o7, o8) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8));
-				case 9: 
+				case 9:
 					return (EventWrapper09)((o1, o2, o3, o4, o5, o6, o7, o8, o9) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9));
-				case 10: 
+				case 10:
 					return (EventWrapper10)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10));
-				case 11: 
+				case 11:
 					return (EventWrapper11)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11));
-				case 12: 
+				case 12:
 					return (EventWrapper12)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12));
-				case 13: 
+				case 13:
 					return (EventWrapper13)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13));
-				case 14: 
+				case 14:
 					return (EventWrapper14)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14));
-				case 15: 
+				case 15:
 					return (EventWrapper15)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14, o15) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14, o15));
-				case 16: 
+				case 16:
 					return (EventWrapper16)((o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14, o15, o16) => DispatchEvent(sender, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14, o15, o16));
 				default:
 					throw new InternalErrorException("too many args in delegate type");
 			}
 		}
 
-		private void DispatchEvent(object sender, 
+		private void DispatchEvent(object sender,
 			object o01 = null, object o02 = null, object o03 = null, object o04 = null,
 			object o05 = null, object o06 = null, object o07 = null, object o08 = null,
 			object o09 = null, object o10 = null, object o11 = null, object o12 = null,
@@ -331,8 +326,7 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			this.CheckAccess(MemberDescriptorAccess.CanWrite, obj);
 		}
-	
+
 	}
 }
-
 

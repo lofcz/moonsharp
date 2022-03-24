@@ -1,5 +1,4 @@
-﻿
-namespace MoonSharp.Interpreter
+﻿namespace MoonSharp.Interpreter
 {
 	/// <summary>
 	/// Common interface for all resources which are uniquely bound to a script.
@@ -17,7 +16,7 @@ namespace MoonSharp.Interpreter
 
 	internal static class ScriptPrivateResource_Extension
 	{
-		public static void CheckScriptOwnership(this IScriptPrivateResource containingResource,  DynValue[] values)
+		public static void CheckScriptOwnership(this IScriptPrivateResource containingResource, DynValue[] values)
 		{
 			foreach (DynValue v in values)
 				CheckScriptOwnership(containingResource, v);
@@ -26,7 +25,7 @@ namespace MoonSharp.Interpreter
 
 		public static void CheckScriptOwnership(this IScriptPrivateResource containingResource, DynValue value)
 		{
-			if (value != null)
+			if (!value.IsNil())
 			{
 				var otherResource = value.GetAsPrivateResource();
 

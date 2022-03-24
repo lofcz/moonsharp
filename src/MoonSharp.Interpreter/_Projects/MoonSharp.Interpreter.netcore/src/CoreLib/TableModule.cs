@@ -64,9 +64,7 @@ namespace MoonSharp.Interpreter.CoreLib
 			for (int i = 0; i < end; i++)
             {
 				DynValue d = vlist.Table.Get(i);
-				if (d != DynValue.Nil) {
-					values.Add(d);
-				}
+				values.Add(d);
             }
 
 			try
@@ -89,11 +87,11 @@ namespace MoonSharp.Interpreter.CoreLib
 
 		private static int SortComparer(ScriptExecutionContext executionContext, DynValue a, DynValue b, DynValue lt)
 		{
-			if (lt == null || lt.IsNil())
+			if (lt.IsNil())
 			{
 				lt = executionContext.GetBinaryMetamethod(a, b, "__lt");
 
-				if (lt == null || lt.IsNil())
+				if (lt.IsNil())
 				{
 					if (a.Type == DataType.Number && b.Type == DataType.Number)
 						return a.Number.CompareTo(b.Number);
@@ -255,7 +253,7 @@ namespace MoonSharp.Interpreter.CoreLib
 		{
 			DynValue __len = executionContext.GetMetamethod(vlist, "__len");
 
-			if (__len != null)
+			if (__len.IsNotNil())
 			{
 				DynValue lenv = executionContext.GetScript().Call(__len, vlist);
 

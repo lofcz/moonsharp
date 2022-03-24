@@ -13,32 +13,33 @@ namespace MoonSharp.Interpreter.Platforms
 	{
 		public override void DefaultPrint(string content)
 		{
-			throw new NotImplementedException();
+			Console.WriteLine(content);
+			return;
 		}
 
 		public override CoreModules FilterSupportedCoreModules(CoreModules module)
 		{
-			throw new NotImplementedException();
+			return CoreModules.Basic;
 		}
 
 		public override string GetEnvironmentVariable(string envvarname)
 		{
-			throw new NotImplementedException();
+			return "";
 		}
 
 		public override string GetPlatformNamePrefix()
 		{
-			throw new NotImplementedException();
+			return "";
 		}
 
 		public override Stream IO_GetStandardStream(StandardFileType type)
 		{
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public override Stream IO_OpenFile(Script script, string filename, Encoding encoding, string mode)
 		{
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public override string IO_OS_GetTempFilename()

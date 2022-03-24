@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using MoonSharp.Interpreter.CoreLib;
 using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Diagnostics;
+using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
 using MoonSharp.Interpreter.IO;
 using MoonSharp.Interpreter.Platforms;
@@ -24,7 +24,7 @@ namespace MoonSharp.Interpreter
 		/// <summary>
 		/// The version of the MoonSharp engine
 		/// </summary>
-		public const string VERSION = "2.0.0.0";
+		public const string VERSION = "3.0.0.0";
 
 		/// <summary>
 		/// The Lua version being supported
@@ -37,6 +37,7 @@ namespace MoonSharp.Interpreter
 		Table m_GlobalTable;
 		IDebugger m_Debugger;
 		Table[] m_TypeMetatables = new Table[(int)LuaTypeExtensions.MaxMetaTypes];
+		public Dictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Initializes the <see cref="Script"/> class.
@@ -78,8 +79,6 @@ namespace MoonSharp.Interpreter
 			m_GlobalTable = new Table(this).RegisterCoreModules(coreModules);
 		}
 
-
-		public Dictionary<string, object> Data {get; set;} = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Gets or sets the script loader which will be used as the value of the
@@ -205,11 +204,9 @@ namespace MoonSharp.Interpreter
 		{
 			this.CheckScriptOwnership(globalTable);
 
-			Stream codeStream = new UndisposableStream(stream);
-
-			if (!Processor.IsDumpStream(codeStream))
+			if (!Processor.IsDumpStream(stream))
 			{
-				using (StreamReader sr = new StreamReader(codeStream))
+				using (StreamReader sr = new StreamReader(stream, Encoding.UTF8, true, 4096, true))
 				{
 					string scriptCode = sr.ReadToEnd();
 					return LoadString(scriptCode, globalTable, codeFriendlyName);
@@ -226,7 +223,7 @@ namespace MoonSharp.Interpreter
 				m_Sources.Add(source);
 
 				bool hasUpvalues;
-				int address = m_MainProcessor.Undump(codeStream, m_Sources.Count - 1, globalTable ?? m_GlobalTable, out hasUpvalues);
+				int address = m_MainProcessor.Undump(stream, m_Sources.Count - 1, globalTable ?? m_GlobalTable, out hasUpvalues);
 
 				SignalSourceCodeChange(source);
 				SignalByteCodeChange();
@@ -243,6 +240,7 @@ namespace MoonSharp.Interpreter
 		/// </summary>
 		/// <param name="function">The function.</param>
 		/// <param name="stream">The stream.</param>
+		/// <param name="writeSourceRefs">Write referenced line numbers</param>
 		/// <exception cref="System.ArgumentException">
 		/// function arg is not a function!
 		/// or
@@ -250,7 +248,7 @@ namespace MoonSharp.Interpreter
 		/// or
 		/// function arg has upvalues other than _ENV
 		/// </exception>
-		public void Dump(DynValue function, Stream stream)
+		public void Dump(DynValue function, Stream stream, bool writeSourceRefs = true)
 		{
 			this.CheckScriptOwnership(function);
 
@@ -265,8 +263,21 @@ namespace MoonSharp.Interpreter
 			if (upvaluesType == Closure.UpvaluesType.Closure)
 				throw new ArgumentException("function arg has upvalues other than _ENV");
 
-			UndisposableStream outStream = new UndisposableStream(stream);
-			m_MainProcessor.Dump(outStream, function.Function.EntryPointByteCodeLocation, upvaluesType == Closure.UpvaluesType.Environment);
+			m_MainProcessor.Dump(stream, function.Function.EntryPointByteCodeLocation, upvaluesType == Closure.UpvaluesType.Environment, writeSourceRefs);
+
+		}
+
+		/// <summary>
+		/// Dumps the bytecode for a function to a human-readable string
+		/// </summary>
+		/// <param name="function"></param>
+		public string DumpString(DynValue function)
+		{
+			this.CheckScriptOwnership(function);
+
+			if (function.Type != DataType.Function)
+				throw new ArgumentException("function arg is not a function!");
+			return m_MainProcessor.DumpString(function.Function.EntryPointByteCodeLocation);
 		}
 
 
@@ -363,6 +374,7 @@ namespace MoonSharp.Interpreter
 		public DynValue DoFile(string filename, Table globalContext = null, string codeFriendlyName = null)
 		{
 			DynValue func = LoadFile(filename, globalContext, codeFriendlyName);
+			File.WriteAllText("/home/cmcging/output.txt", m_ByteCode.Dump());
 			return Call(func);
 		}
 
@@ -402,18 +414,18 @@ namespace MoonSharp.Interpreter
 
 			if (envTable == null)
 			{
-				Instruction meta = m_MainProcessor.FindMeta(ref address);
+				Instruction? meta = m_MainProcessor.FindMeta(ref address);
 
 				// if we find the meta for a new chunk, we use the value in the meta for the _ENV upvalue
-				if ((meta != null) && (meta.NumVal2 == (int)OpCodeMetadataType.ChunkEntrypoint))
+				if ((meta != null) && (meta.Value.NumVal2 == (int)OpCodeMetadataType.ChunkEntrypoint))
 				{
 					c = new Closure(this, address,
 						new SymbolRef[] { SymbolRef.Upvalue(WellKnownSymbols.ENV, 0) },
-						new DynValue[] { meta.Value });
+						new Upvalue[1]);
 				}
 				else
 				{
-					c = new Closure(this, address, new SymbolRef[0], new DynValue[0]);
+					c = new Closure(this, address, new SymbolRef[0], new Upvalue[0]);
 				}
 			}
 			else
@@ -422,8 +434,8 @@ namespace MoonSharp.Interpreter
 					new SymbolRef() { i_Env = null, i_Index= 0, i_Name = WellKnownSymbols.ENV, i_Type =  SymbolRefType.DefaultEnv },
 				};
 
-				var vals = new DynValue[] {
-					DynValue.NewTable(envTable)
+				var vals = new Upvalue[] {
+					Upvalue.Create(DynValue.NewTable(envTable))
 				};
 
 				c = new Closure(this, address, syms, vals);
@@ -463,7 +475,7 @@ namespace MoonSharp.Interpreter
 			{
 				DynValue metafunction = m_MainProcessor.GetMetamethod(function, "__call");
 
-				if (metafunction != null)
+				if (metafunction.IsNotNil())
 				{
 					DynValue[] metaargs = new DynValue[args.Length + 1];
 					metaargs[0] = function;
@@ -739,7 +751,7 @@ namespace MoonSharp.Interpreter
 
 			StringBuilder sb = new StringBuilder();
 			sb.AppendLine(string.Format("MoonSharp {0}{1} [{2}]", subproduct, Script.VERSION, Script.GlobalOptions.Platform.GetPlatformName()));
-			sb.AppendLine("Copyright (C) 2014-2016 Marco Mastropaolo");
+			sb.AppendLine("Copyright (C) 2014-2022 MoonSharp Contributors");
 			sb.AppendLine("http://www.moonsharp.org");
 			return sb.ToString();
 		}

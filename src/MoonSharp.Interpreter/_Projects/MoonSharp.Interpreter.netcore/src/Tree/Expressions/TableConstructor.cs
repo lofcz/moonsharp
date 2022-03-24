@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using MoonSharp.Interpreter.DataStructs;
 using MoonSharp.Interpreter.Execution;
 
 namespace MoonSharp.Interpreter.Tree.Expressions
 {
-	class TableConstructor : Expression 
+	class TableConstructor : Expression
 	{
 		bool m_Shared = false;
 		List<Expression> m_PositionalValues = new List<Expression>();
@@ -100,7 +101,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 				bc.Emit_TblInitN();
 			}
 
-			for (int i = 0; i < m_PositionalValues.Count; i++ )
+			for (int i = 0; i < m_PositionalValues.Count; i++)
 			{
 				m_PositionalValues[i].Compile(bc);
 				bc.Emit_TblInitI(i == m_PositionalValues.Count - 1);
@@ -130,6 +131,12 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			}
 
 			return tval;
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = DynValue.Nil;
+			return false;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using MoonSharp.Interpreter.DataStructs;
 using MoonSharp.Interpreter.Execution;
 using MoonSharp.Interpreter.Execution.VM;
 
@@ -12,9 +13,9 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 		[Flags]
 		private enum Operator
 		{
-			NotAnOperator = 0, 
-			
-			Or = 0x1, 
+			NotAnOperator = 0,
+
+			Or = 0x1,
 			And = 0x2,
 			Less = 0x4,
 			Greater = 0x8,
@@ -140,7 +141,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 				throw new InternalErrorException("Expression reduction didn't work! - 1");
 			if (nodes.Expr == null)
 				throw new InternalErrorException("Expression reduction didn't work! - 2");
-			
+
 			return nodes.Expr;
 		}
 
@@ -250,7 +251,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 
 		private BinaryOperatorExpression(Expression exp1, Expression exp2, Operator op, ScriptLoadingContext lcontext)
-			: base (lcontext)
+			: base(lcontext)
 		{
 			m_Exp1 = exp1;
 			m_Exp2 = exp2;
@@ -299,34 +300,90 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 		public override void Compile(Execution.VM.ByteCode bc)
 		{
-			m_Exp1.Compile(bc);
+			m_Exp1.CompilePossibleLiteral(bc);
 
 			if (m_Operator == Operator.Or)
 			{
-				Instruction i = bc.Emit_Jump(OpCode.JtOrPop, -1);
-				m_Exp2.Compile(bc);
-				i.NumVal = bc.GetJumpPointForNextInstruction();
+				int i = bc.Emit_Jump(OpCode.JtOrPop, -1);
+				m_Exp2.CompilePossibleLiteral(bc);
+				bc.SetNumVal(i, bc.GetJumpPointForNextInstruction());
 				return;
 			}
 
 			if (m_Operator == Operator.And)
 			{
-				Instruction i = bc.Emit_Jump(OpCode.JfOrPop, -1);
-				m_Exp2.Compile(bc);
-				i.NumVal = bc.GetJumpPointForNextInstruction();
+				int i = bc.Emit_Jump(OpCode.JfOrPop, -1);
+				m_Exp2.CompilePossibleLiteral(bc);
+				bc.SetNumVal(i, bc.GetJumpPointForNextInstruction());
 				return;
 			}
 
 
 			if (m_Exp2 != null)
 			{
-				m_Exp2.Compile(bc);
+				m_Exp2.CompilePossibleLiteral(bc);
 			}
 
 			bc.Emit_Operator(OperatorToOpCode(m_Operator));
 
 			if (ShouldInvertBoolean(m_Operator))
 				bc.Emit_Operator(OpCode.Not);
+		}
+
+		public override bool EvalLiteral(out DynValue dv)
+		{
+			dv = DynValue.Nil;
+			if (!m_Exp1.EvalLiteral(out var v1))
+				return false;
+			bool t1Neg = m_Exp1 is UnaryOperatorExpression uo &&
+						 uo.IsNegativeNumber;
+			v1 = v1.ToScalar();
+			if (!m_Exp2.EvalLiteral(out var v2))
+				return false;
+			v2 = v2.ToScalar();
+			if (m_Operator == Operator.Or)
+			{
+				if (v1.CastToBool())
+					dv = v1;
+				else
+					dv = v2;
+			}
+			else if (m_Operator == Operator.And)
+			{
+				if (!v1.CastToBool())
+					dv = v1;
+				else
+					dv = v2;
+			}
+			else if ((m_Operator & COMPARES) != 0)
+			{
+				if (v1.Type == DataType.Number && v2.Type == DataType.Number ||
+					v1.Type == DataType.String && v2.Type == DataType.String)
+					dv = DynValue.NewBoolean(EvalComparison(v1, v2, m_Operator));
+				else
+					return false;
+			}
+			else if (m_Operator == Operator.StrConcat)
+			{
+				string s1 = v1.CastToString();
+				string s2 = v2.CastToString();
+
+				if (s1 == null || s2 == null)
+					return false;
+
+				dv = DynValue.NewString(s1 + s2);
+			}
+			else
+			{
+				//Check correct casts
+				double? nd1 = v1.CastToNumber();
+				double? nd2 = v2.CastToNumber();
+				if (nd1 == null || nd2 == null)
+					return false;
+				//Literal evaluation
+				dv = DynValue.NewNumber(EvalArithmetic(v1, v2, t1Neg));
+			}
+			return true;
 		}
 
 		public override DynValue Eval(ScriptExecutionContext context)
@@ -353,7 +410,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 
 			if ((m_Operator & COMPARES) != 0)
 			{
-				return DynValue.NewBoolean(EvalComparison(v1, v2, m_Operator));				
+				return DynValue.NewBoolean(EvalComparison(v1, v2, m_Operator));
 			}
 			else if (m_Operator == Operator.StrConcat)
 			{
@@ -371,7 +428,7 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 			}
 		}
 
-		private double EvalArithmetic(DynValue v1, DynValue v2)
+		private double EvalArithmetic(DynValue v1, DynValue v2, bool t1Neg = false)
 		{
 			double? nd1 = v1.CastToNumber();
 			double? nd2 = v2.CastToNumber();
@@ -393,11 +450,10 @@ namespace MoonSharp.Interpreter.Tree.Expressions
 				case Operator.Div:
 					return d1 / d2;
 				case Operator.Mod:
-					{
-						double mod = Math.IEEERemainder(d1, d2);
-						if (mod < 0) mod += d2;
-						return mod;
-					}
+					return (d1) - Math.Floor((d1) / (d2)) * (d2);
+				case Operator.Power:
+					var res = Math.Pow(t1Neg ? -d1 : d1, d2);
+					return t1Neg ? -res : res;
 				default:
 					throw new DynamicExpressionException("Unsupported operator {0}", m_Operator);
 			}
