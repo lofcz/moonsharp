@@ -512,7 +512,16 @@ namespace MoonSharp.Interpreter
 			DynValue[] dargs = new DynValue[args.Length];
 
 			for (int i = 0; i < dargs.Length; i++)
-				dargs[i] = DynValue.FromObject(this, args[i]);
+            {
+				if (args[i] is DynValue[] dv)
+                {
+					dargs[i] = dv[0];
+                }
+				else
+                {
+					dargs[i] = DynValue.FromObject(this, args[i]);
+				}
+			}
 
 			return Call(function, dargs);
 		}

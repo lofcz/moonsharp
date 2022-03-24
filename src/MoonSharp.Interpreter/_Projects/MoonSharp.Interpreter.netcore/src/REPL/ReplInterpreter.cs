@@ -109,7 +109,7 @@ namespace MoonSharp.Interpreter.REPL
 				sre.Rethrow();
 				throw;
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				m_CurrentCommand = "";
 				throw;

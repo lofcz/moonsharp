@@ -28,6 +28,7 @@ namespace MoonSharp
 			script.Globals["makestatic"] = (Func<string, DynValue>)(MakeStatic);
 			script.Globals["mojeip"] = (Func<Task<DynValue>>)(GetMyIp);
 			script.Globals["mojeip_sync"] = (Func<DynValue>)(GetMyIpSync);
+			script.Globals["ds_list_filter"] = (Func<Script, CallbackArguments, DynValue>)(DsListFilter);
 
 			if (CheckArgs(args, new ShellContext(script)))
 				return;
@@ -58,6 +59,28 @@ namespace MoonSharp
 		private static DynValue GetMyIpSync()
 		{
 			return DynValue.NewString("1");
+		}
+
+		static DynValue DsListFilter(Script sc, CallbackArguments args)
+		{
+			Table tbl = new Table(sc);
+			DynValue dv = DynValue.NewTable(tbl);
+
+			Table toFilter = args[0].Table;
+			Closure filterFn = args[1].Function;
+
+			foreach (TablePair pair in toFilter.Pairs)
+			{
+				DynValue valPair = pair.Value;
+
+				DynValue check = filterFn.Call(valPair);
+				if (check.Boolean)
+				{
+					tbl.Append(valPair);
+				}
+			}
+
+			return dv;
 		}
 
 		private static DynValue MakeStatic(string type)
