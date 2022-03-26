@@ -96,5 +96,12 @@ namespace MoonSharp.Interpreter
 		/// </summary>
 		public bool CheckThreadAccess { get; set; }
 
+		/// <summary>
+		/// Gets or sets a value indicating whether or not tasks are automatically awaited.
+		/// When set to true, each call to a CLR function returning Task will automatically await and cast the value
+		/// When set to false, the call returns a task object that can have await() called on it.
+		/// </summary>
+		public bool AutoAwait { get; set; }
+
 	}
 }

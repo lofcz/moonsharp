@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MoonSharp.Interpreter.Execution;
+using System.Threading.Tasks;
 
 namespace MoonSharp.Interpreter
 {
@@ -49,6 +50,21 @@ namespace MoonSharp.Interpreter
 		/// The current closure context
 		/// </summary>
 		internal ClosureContext ClosureContext { get; private set; }
+
+		public Task<DynValue> CallAsync()
+		{
+			return OwnerScript.CallAsync(this);
+		}
+
+		public Task<DynValue> CallAsync(params object[] args)
+		{
+			return OwnerScript.CallAsync(this, args);
+		}
+
+		public Task<DynValue> CallAsync(params DynValue[] args)
+		{
+			return OwnerScript.CallAsync(this, args);
+		}
 
 
 		/// <summary>

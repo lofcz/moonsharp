@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using MoonSharp.Interpreter.Tree;
+using System.Threading.Tasks;
+using MoonSharp.Interpreter.Interop;
 
 namespace MoonSharp.Interpreter
 {
@@ -66,6 +68,16 @@ namespace MoonSharp.Interpreter
 		/// </summary>
 		public UserData UserData { get { return m_Object as UserData; } }
 		public int Int { get { return (int)m_Number; } }
+		internal Task Task { get { return m_Object as Task; } }
+
+		internal static DynValue NewAwaitReq(System.Threading.Tasks.Task task)
+		{
+			return new DynValue()
+			{
+				m_Object = task,
+				m_Type = DataType.AwaitRequest
+			};
+		}
 
 		/// <summary>
 		/// Creates a new writable value initialized to the specified boolean.
