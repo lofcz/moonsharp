@@ -42,7 +42,7 @@ namespace MoonSharp.Interpreter
 		{
 			for (int i = 0; i < arrayValues.Length; i++)
 			{
-				this.Set(DynValue.NewNumber(i + 0), arrayValues[i]);
+				this.Set(DynValue.NewNumber(i + (owner.Options.ZeroIndexTables ? 0 : 1)), arrayValues[i]);
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace MoonSharp.Interpreter
 		{
 			int v = ((int)d);
 
-			if (d >= 0.0 && d == v)
+			if (d >= (OwnerScript.Options.ZeroIndexTables ? 0.0 : 1.0) && d == v)
 				return v;
 
 			return -1;
@@ -130,7 +130,7 @@ namespace MoonSharp.Interpreter
 			Table t = this;
 			key = (keys.Length > 0) ? keys[0] : null;
 
-			for (int i = 0; i < keys.Length; ++i)
+			for (int i = m_Owner.Options.ZeroIndexTables ? 0 : 1; i < keys.Length; ++i)
 			{
 				DynValue vt = t.RawGet(key);
 
@@ -154,7 +154,8 @@ namespace MoonSharp.Interpreter
 		public void Append(DynValue value)
 		{
 			this.CheckScriptOwnership(value);
-			PerformTableSet(m_ArrayMap, Length + 0, DynValue.NewNumber(Length + 0), value, true, Length + 0);
+			int indexFix = m_Owner.Options.ZeroIndexTables ? 0 : 1;
+			PerformTableSet(m_ArrayMap, Length + indexFix, DynValue.NewNumber(Length + indexFix), value, true, Length + indexFix);
 		}
 
 		#region Set
@@ -208,7 +209,7 @@ namespace MoonSharp.Interpreter
 		/// <param name="key">The key.</param>
 		/// <param name="value">The value.</param>
 		public void Set(string key, DynValue value)
-		{
+	{
 			if (key == null)
 				throw ScriptRuntimeException.TableIndexIsNil();
 
@@ -252,7 +253,7 @@ namespace MoonSharp.Interpreter
 			{
 				int idx = GetIntegralKey(key.Number);
 
-				if (idx >= 0)
+				if (idx >= (OwnerScript.Options.ZeroIndexTables ? 0 : 1))
 				{
 					Set(idx, value);
 					return;
@@ -398,7 +399,7 @@ namespace MoonSharp.Interpreter
 			if (key.Type == DataType.Number)
 			{
 				int idx = GetIntegralKey(key.Number);
-				if (idx >= 0)
+				if (idx >= (OwnerScript.Options.ZeroIndexTables ? 0 : 1))
 					return RawGet(idx);
 			}
 
@@ -489,7 +490,7 @@ namespace MoonSharp.Interpreter
 			if (key.Type == DataType.Number)
 			{
 				int idx = GetIntegralKey(key.Number);
-				if (idx >= 0)
+				if (idx >= (OwnerScript.Options.ZeroIndexTables ? 0 : 1))
 					return Remove(idx);
 			}
 
@@ -578,7 +579,7 @@ namespace MoonSharp.Interpreter
 			{
 				int idx = GetIntegralKey(v.Number);
 
-				if (idx >= 0)
+				if (idx >= (OwnerScript.Options.ZeroIndexTables ? 0 : 1))
 				{
 					return GetNextOf(m_ArrayMap.Find(idx));
 				}
@@ -616,8 +617,8 @@ namespace MoonSharp.Interpreter
 				{
 					m_CachedLength = 0;
 
-					for (int i = 0; m_ArrayMap.ContainsKey(i) && !m_ArrayMap.Find(i).Value.Value.IsNil(); i++)
-						m_CachedLength = i + 1;
+					for (int i = OwnerScript.Options.ZeroIndexTables ? 0 : 1; m_ArrayMap.ContainsKey(i) && !m_ArrayMap.Find(i).Value.Value.IsNil(); i++)
+						m_CachedLength = i + (OwnerScript.Options.ZeroIndexTables ? 1 : 0);
 				}
 
 				return m_CachedLength;
@@ -633,7 +634,14 @@ namespace MoonSharp.Interpreter
 			}
 			else
 			{
-				Set(m_InitArray++, val.ToScalar());
+			    if (OwnerScript.Options.ZeroIndexTables)
+                {
+					Set(m_InitArray++, val.ToScalar());
+				}
+				else
+                {
+					Set(++m_InitArray, val.ToScalar());
+				}
 			}
 		}
 

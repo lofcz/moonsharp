@@ -25,6 +25,7 @@ namespace MoonSharp
 
 			Script script = new Script(CoreModules.Preset_Complete);
 
+			script.Options.ZeroIndexTables = true;
 			script.Globals["makestatic"] = (Func<string, DynValue>)(MakeStatic);
 			script.Globals["mojeip"] = (Func<Task<DynValue>>)(GetMyIp);
 			script.Globals["mojeip_sync"] = (Func<DynValue>)(GetMyIpSync);

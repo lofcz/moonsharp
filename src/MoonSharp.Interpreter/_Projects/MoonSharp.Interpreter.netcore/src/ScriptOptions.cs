@@ -103,5 +103,12 @@ namespace MoonSharp.Interpreter
 		/// </summary>
 		public bool AutoAwait { get; set; }
 
+		/// <summary>
+		/// Gets or sets a value indicating whether tables are zero-indexed
+		/// When set to true, first table entry will be arr[0]
+		/// When set to false, first table entry will be arr[1]
+		/// </summary>
+		public bool ZeroIndexTables { get; set; } = true;
+
 	}
 }

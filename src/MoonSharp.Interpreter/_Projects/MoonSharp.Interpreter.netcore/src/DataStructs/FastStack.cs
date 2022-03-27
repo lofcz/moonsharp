@@ -23,11 +23,7 @@ namespace MoonSharp.Interpreter.DataStructs
 			this.maxCapacity = maxCapacity;
 		}
 
-		public T this[int index]
-		{
-			get { return m_Storage[index]; }
-			set { m_Storage[index] = value; }
-		}
+		public ref T this[int index] => ref m_Storage[index];
 
 		void Grow(int newSize)
 		{
@@ -52,15 +48,22 @@ namespace MoonSharp.Interpreter.DataStructs
 			return item;
 		}
 
-		public void Expand(int size)
+		public int Reserve(int size)
 		{
 			Grow(m_HeadIdx + size);
+			var retval = m_HeadIdx;
 			m_HeadIdx += size;
+			return retval;
 		}
 
 		private void Zero(int from, int to)
 		{
 			Array.Clear(m_Storage, from, to - from + 1);
+		}
+
+		public void ClearSection(int index, int length)
+		{
+			Array.Clear(m_Storage, index, length);
 		}
 
 		private void Zero(int index)

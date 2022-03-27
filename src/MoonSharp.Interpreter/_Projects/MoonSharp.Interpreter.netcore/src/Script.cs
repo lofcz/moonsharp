@@ -444,7 +444,6 @@ namespace MoonSharp.Interpreter
 		public DynValue DoFile(string filename, Table globalContext = null, string codeFriendlyName = null)
 		{
 			DynValue func = LoadFile(filename, globalContext, codeFriendlyName);
-			File.WriteAllText("/home/cmcging/output.txt", m_ByteCode.Dump());
 			return Call(func);
 		}
 
@@ -583,14 +582,7 @@ namespace MoonSharp.Interpreter
 
 			for (int i = 0; i < dargs.Length; i++)
             {
-				if (args[i] is DynValue[] dv)
-                {
-					dargs[i] = dv[0];
-                }
-				else
-                {
-					dargs[i] = DynValue.FromObject(this, args[i]);
-				}
+				dargs[i] = DynValue.FromObject(this, args[i]);
 			}
 
 			return Call(function, dargs);

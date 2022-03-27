@@ -211,8 +211,8 @@ namespace MoonSharp.Interpreter.Execution.VM
 							ExecExpTuple(i);
 							break;
 						case OpCode.Local:
-							var scope = m_ExecutionStack.Peek().LocalScope;
-							m_ValueStack.Push(scope[i.NumVal]);
+							var scope = m_ExecutionStack.Peek().BasePointer;
+							m_ValueStack.Push(m_ValueStack[scope + i.NumVal]);
 							break;
 						case OpCode.Upvalue:
 							{
@@ -377,7 +377,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 		private void AssignLocal(SymbolRef symref, DynValue value)
 		{
 			var stackframe = m_ExecutionStack.Peek();
-			stackframe.LocalScope[symref.i_Index] = value;
+			m_ValueStack[stackframe.LocalBase + symref.i_Index] = value;
 		}
 
 		private void ExecStoreLcl(Instruction i)
@@ -441,7 +441,11 @@ namespace MoonSharp.Interpreter.Execution.VM
 			if (s.Type == SymbolRefType.Local)
 			{
 				var ex = m_ExecutionStack.Peek();
-				var upval = new Upvalue(ex.LocalScope, s.i_Index);
+				for (int i = 0; i < ex.OpenClosures.Count; i++)
+				{
+					if (ex.OpenClosures[i].Index == ex.LocalBase + s.i_Index) return ex.OpenClosures[i];
+				}
+				var upval = new Upvalue(m_ValueStack, ex.LocalBase + s.i_Index);
 				ex.OpenClosures.Add(upval);
 				return upval;
 			}
@@ -586,7 +590,8 @@ namespace MoonSharp.Interpreter.Execution.VM
 			CallStackItem cur = m_ExecutionStack.Peek();
 
 			cur.Debug_Symbols = i.SymbolList;
-			cur.LocalScope = new DynValue[i.NumVal];
+			cur.LocalCount = i.NumVal;
+			cur.LocalBase = m_ValueStack.Reserve(i.NumVal);
 
 			ClearBlockData(i);
 		}
@@ -594,6 +599,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 		private CallStackItem PopToBasePointer()
 		{
 			var csi = m_ExecutionStack.Pop();
+			foreach (var closure in csi.OpenClosures) closure.Close();
 			if (csi.BasePointer >= 0)
 				m_ValueStack.CropAtCount(csi.BasePointer);
 			return csi;
@@ -635,10 +641,11 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 		private void ExecArgs(Instruction I)
 		{
-			int numargs = (int)m_ValueStack.Peek(0).Number;
+			int localCount = m_ExecutionStack.Peek().LocalCount;
+			int numargs = (int)m_ValueStack.Peek(localCount).Number;
 
 			// unpacks last tuple arguments to simplify a lot of code down under
-			var argsList = CreateArgsListForFunctionCall(numargs, 1);
+			var argsList = CreateArgsListForFunctionCall(numargs, 1 + localCount);
 
 			for (int i = 0; i < I.SymbolList.Length; i++)
 			{
